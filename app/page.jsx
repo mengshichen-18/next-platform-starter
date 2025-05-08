@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 
-let API_key = "sk-0ad6d4515579467f861e113efe4c6f43";
 
 export default function Page() {
     const [file, setFile] = useState(null);

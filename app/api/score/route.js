@@ -5,7 +5,7 @@ import { Readable } from 'stream';
 // 初始化 DeepSeek 客户端
 const openai = new OpenAI({
   baseURL: 'https://api.deepseek.com',
-  apiKey: 'sk-0ad6d4515579467f861e113efe4c6f43',
+  apiKey: process.env.DEEPSEEK_API_KEY,
 });
 
 // 解析 multipart/form-data 文件
