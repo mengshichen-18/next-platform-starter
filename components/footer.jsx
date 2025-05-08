@@ -5,7 +5,7 @@ export function Footer() {
         <footer className="pt-16 pb-12 sm:pt-24 sm:pb-16">
             <p className="text-sm">
 
-                    I'm Chen Mengshi
+                    Deployed by Chen Mengshi
           </p>
         </footer>
     );
