@@ -83,7 +83,7 @@ export default function Page() {
                     className={`py-2 px-4 rounded 
                         ${loading 
                             ? 'bg-gray-400 cursor-not-allowed text-white' 
-                            : 'bg-blue-600 hover:bg-blue-700 text-white'}
+                            : 'bg-green-400 hover:bg-blue-700 text-white'}
                     `}
                 >
                     {loading ? "提交中..." : "提交评分请求"}

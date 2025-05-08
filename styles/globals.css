@@ -3,12 +3,7 @@
 @import 'tailwindcss';
 
 @theme {
-    --background-image-noise: linear-gradient(
-            to bottom,
-            color-mix(in oklab, var(--color-neutral-950) 0%, transparent),
-            color-mix(in oklab, var(--color-neutral-950) 100%, transparent)
-        ),
-        url('/images/noise.png');
+
     --color-primary: #2bdcd2;
     --color-primary-content: #171717;
     --color-secondary: #016968;
@@ -17,6 +12,14 @@
 }
 
 @layer base {
+
+    body {
+        background-color: #0f3d3e;
+        color: white;
+        --background-image-noise: linear-gradient(to bottom, rgba(255,255,255,0.7), rgba(255,255,255,0));
+      }
+      
+    
     h1 {
         @apply text-4xl font-bold tracking-tight sm:text-5xl;
     }
@@ -37,6 +40,7 @@
         @apply px-1 py-0.5 font-mono rounded bg-neutral-900 text-yellow-200;
         font-size: 0.9em;
     }
+
 }
 
 @layer components {
@@ -154,4 +158,16 @@
             pointer-events: none;
         }
     }
+
+
 }
+
+@layer utilities {
+    .bg-noise {
+      background-image: var(--background-image-noise);
+      background-repeat: no-repeat;
+      background-size: cover;
+      background-position: center;
+    }
+  }
+  
