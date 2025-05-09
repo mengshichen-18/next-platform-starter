@@ -12,6 +12,7 @@
         "@netlify/blobs": "^8.2.0",
         "blobshape": "^1.0.0",
         "bright": "^0.8.5",
+        "file-saver": "^2.0.5",
         "markdown-to-jsx": "^7.4.5",
         "next": "15.3.1",
         "openai": "^4.97.0",
