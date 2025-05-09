@@ -26,26 +26,26 @@ export async function POST(req) {
     fileText = buffer.toString('utf-8');
   }
 
-  const results = {};
-
   try {
-    for (const { key, prompt } of scoringPrompts) {
-      const fullPrompt = prompt + fileText;
+    const resultsArray = await Promise.all(
+      scoringPrompts.map(async ({ key, prompt }) => {
+        const fullPrompt = prompt + fileText;
+        const completion = await openai.chat.completions.create({
+          messages: [
+            { role: 'system', content: '你是一个评分助手，请严格返回一个 0-10 的整数，不要输出其他任何内容。' },
+            { role: 'user', content: fullPrompt },
+          ],
+          model: 'deepseek-chat',
+        });
 
-      const completion = await openai.chat.completions.create({
-        messages: [
-          { role: 'system', content: '你是一个评分助手，请严格返回一个 0-10 的整数，不要输出其他任何内容。' },
-          { role: 'user', content: fullPrompt },
-        ],
-        model: 'deepseek-chat',
-      });
+        const scoreText = completion.choices[0].message.content.trim();
+        const parsedScore = parseInt(scoreText.match(/\d+/)?.[0] || '-1');
+        console.log(`${key} 评分结果:`, parsedScore);
+        return [key, parsedScore];
+      })
+    );
 
-      const scoreText = completion.choices[0].message.content.trim();
-      const parsedScore = parseInt(scoreText.match(/\d+/)?.[0] || '-1');
-      results[key] = parsedScore;
-      console.log(`${key} 评分结果:`, parsedScore)
-    }
-    // console.log('评分结果:', results)
+    const results = Object.fromEntries(resultsArray);
     return NextResponse.json(results);
   } catch (err) {
     console.error('评分失败:', err);
