@@ -93,11 +93,11 @@ export default function Page() {
     saveAs(blob, 'score.csv');
   };
 
-  const buttonClass = `py-2 px-4 rounded w-full ${loadingIndex !== null ? 'bg-gray-400 cursor-not-allowed text-white' : 'bg-green-500 hover:bg-green-700 text-white'}`;
+  const buttonClass = `py-2 px-4 rounded w-full ${loadingIndex !== null ? 'bg-gray-400 cursor-not-allowed text-white' : 'bg-green-500 hover:bg-green-700 text-white'} cursor-pointer`;
 
   return (
     <div className="max-w-5xl mx-auto py-10 px-4">
-      <h1 className="text-2xl font-bold mb-6">大模型评分助手</h1>
+      <h1 className="text-2xl font-bold mb-6">大模型评分助手（默认使用DeepSeek-V3模型）</h1>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <label className="flex flex-col">
@@ -136,7 +136,7 @@ export default function Page() {
       </form>
 
       <div className="mt-8">
-        <h2 className="font-medium mb-2">或使用自定义 LLM（支持 DeepSeek / 通义千问）</h2>
+        <h3 className="font-medium mb-2">或使用自定义 LLM（支持 DeepSeek/Qwen等OpenAI框架的LLM API）</h3>
         <input
           type="text"
           placeholder="模型 API 地址"
@@ -153,7 +153,7 @@ export default function Page() {
         />
         <input
           type="text"
-          placeholder="模型名称（如 deepseek-chat 或 qwen-turbo）"
+          placeholder="模型名称（如 deepseek-chat 或 qwen-long）"
           value={customModel}
           onChange={(e) => setCustomModel(e.target.value)}
           className="border p-2 rounded w-full mb-4"
