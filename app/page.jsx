@@ -8,6 +8,10 @@ export default function Page() {
   const [files, setFiles] = useState([]);
   const [results, setResults] = useState([]);
   const [loadingIndex, setLoadingIndex] = useState(null);
+  const [customUrl, setCustomUrl] = useState('');
+  const [customKey, setCustomKey] = useState('');
+  const [customModel, setCustomModel] = useState('');
+  const [activeMode, setActiveMode] = useState(null); // 'default' or 'custom'
 
   const handleAddFiles = (e) => {
     const selected = Array.from(e.target.files);
@@ -21,6 +25,7 @@ export default function Page() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setResults([]);
+    setActiveMode('default');
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
@@ -42,6 +47,41 @@ export default function Page() {
       }
     }
     setLoadingIndex(null);
+    setActiveMode(null);
+  };
+
+  const handleCustomLLM = async () => {
+    if (!customKey || !customUrl || !customModel || files.length === 0) {
+      alert('请填写 API Key、URL 和模型名，并上传至少一个文件');
+      return;
+    }
+
+    setResults([]);
+    setActiveMode('custom');
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      setLoadingIndex(i);
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('url', customUrl);
+      formData.append('key', customKey);
+      formData.append('model', customModel);
+
+      const [code, year] = file.name.split('.')[0].split('_');
+      try {
+        const res = await fetch('/api/score', {
+          method: 'POST',
+          body: formData,
+        });
+        if (!res.ok) throw new Error('API 错误');
+        const result = await res.json();
+        setResults(prev => [...prev, { code, year, scores: result }]);
+      } catch (err) {
+        setResults(prev => [...prev, { code, year, scores: null }]);
+      }
+    }
+    setLoadingIndex(null);
+    setActiveMode(null);
   };
 
   const downloadCSV = () => {
@@ -52,6 +92,8 @@ export default function Page() {
     const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
     saveAs(blob, 'score.csv');
   };
+
+  const buttonClass = `py-2 px-4 rounded w-full ${loadingIndex !== null ? 'bg-gray-400 cursor-not-allowed text-white' : 'bg-green-500 hover:bg-green-700 text-white'}`;
 
   return (
     <div className="max-w-5xl mx-auto py-10 px-4">
@@ -87,11 +129,43 @@ export default function Page() {
         <button
           type="submit"
           disabled={loadingIndex !== null}
-          className={`py-2 px-4 rounded ${loadingIndex !== null ? 'bg-gray-400 cursor-not-allowed text-white' : 'bg-green-400 hover:bg-green-700 text-white'}`}
+          className={buttonClass}
         >
-          {loadingIndex !== null ? `评分中（第 ${loadingIndex + 1} 个）...` : '提交评分请求'}
+          {activeMode === 'default' && loadingIndex !== null ? `评分中（第 ${loadingIndex + 1} 个）...` : '提交评分请求'}
         </button>
       </form>
+
+      <div className="mt-8">
+        <h2 className="font-medium mb-2">或使用自定义 LLM（支持 DeepSeek / 通义千问）</h2>
+        <input
+          type="text"
+          placeholder="模型 API 地址"
+          value={customUrl}
+          onChange={(e) => setCustomUrl(e.target.value)}
+          className="border p-2 rounded w-full mb-2"
+        />
+        <input
+          type="text"
+          placeholder="你的 API Key"
+          value={customKey}
+          onChange={(e) => setCustomKey(e.target.value)}
+          className="border p-2 rounded w-full mb-2"
+        />
+        <input
+          type="text"
+          placeholder="模型名称（如 deepseek-chat 或 qwen-turbo）"
+          value={customModel}
+          onChange={(e) => setCustomModel(e.target.value)}
+          className="border p-2 rounded w-full mb-4"
+        />
+        <button
+          onClick={handleCustomLLM}
+          disabled={loadingIndex !== null}
+          className={buttonClass}
+        >
+          {activeMode === 'custom' && loadingIndex !== null ? `评分中（第 ${loadingIndex + 1} 个）...` : '使用自定义模型评分'}
+        </button>
+      </div>
 
       {results.length > 0 && (
         <div className="mt-6 overflow-x-auto">

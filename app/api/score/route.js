@@ -19,6 +19,9 @@ const scoringPrompts = [
 export async function POST(req) {
   const formData = await req.formData();
   const file = formData.get('file');
+  const customUrl = formData.get('url');
+  const customKey = formData.get('key');
+  const customModel = formData.get('model');
 
   let fileText = '';
   if (file && file.arrayBuffer) {
@@ -26,21 +29,28 @@ export async function POST(req) {
     fileText = buffer.toString('utf-8');
   }
 
+  const apiClient = new OpenAI({
+    apiKey: customKey || process.env.DEEPSEEK_API_KEY,
+    baseURL: customUrl || 'https://api.deepseek.com',
+  });
+
+  const modelName = customModel || 'deepseek-chat';
+
   try {
     const resultsArray = await Promise.all(
       scoringPrompts.map(async ({ key, prompt }) => {
         const fullPrompt = prompt + fileText;
-        const completion = await openai.chat.completions.create({
+        const completion = await apiClient.chat.completions.create({
           messages: [
-            { role: 'system', content: '你是一个评分助手，请严格返回一个 0-10 的整数，不要输出其他任何内容。' },
+            { role: 'system', content: '你是评分助手，请严格只返回一个 0 到 10 的整数，不输出其他内容。' },
             { role: 'user', content: fullPrompt },
           ],
-          model: 'deepseek-chat',
+          model: modelName,
         });
 
         const scoreText = completion.choices[0].message.content.trim();
         const parsedScore = parseInt(scoreText.match(/\d+/)?.[0] || '-1');
-        console.log(`${key} 评分结果:`, parsedScore);
+        console.log(`${key} 评分:`, parsedScore);
         return [key, parsedScore];
       })
     );
